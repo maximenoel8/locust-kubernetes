@@ -6,15 +6,25 @@
 master:
   replicaCount: 1
   image:
-    repository: locust-tasks
+    repository: maximenoel8/locust
     tag: latest
     pullPolicy: IfNotPresent
 
 slave:
-  replicaCount: 2
+  replicaCount: 4
   image:
-    repository: locust-tasks
+    repository: maximenoel8/locust
     tag: latest
     pullPolicy: IfNotPresent
 
-targetHost: http://www.google.com
+targetHost: http://wordpress.example.com:30880
+
+namespace: locust
+
+hostAliases:
+  ip: 10.84.72.194
+  host: wordpress.example.com
+
+hostName:
+  name: locust.example.com
+  secretName: locust-tls

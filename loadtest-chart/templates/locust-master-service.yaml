@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "fullname" . }}-master
+  name: {{ .Release.Name }}-master
   labels:
     app: {{ template "fullname" . }}
     component: locust-master

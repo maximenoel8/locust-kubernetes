@@ -1,7 +1,7 @@
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}-locust-slave
+  name: {{ .Release.Name }}-slave
   labels:
     app: {{ template "fullname" . }}
     component: locust-slave
@@ -23,6 +23,10 @@ spec:
         component: locust-slave
         name: {{ template "fullname" . }}-locust-slave
     spec:
+      hostAliases:
+          - ip: {{ .Values.hostAliases.ip}}
+            hostnames:
+              - "{{ .Values.hostAliases.host }}"
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.slave.image.repository }}:{{ .Values.slave.image.tag }}"
@@ -31,6 +35,6 @@ spec:
             - name: LOCUST_MODE
               value: worker
             - name: LOCUST_MASTER
-              value: {{ template "fullname" . }}-master
+              value: {{ .Release.Name }}-master
             - name: TARGET_HOST
               value: "{{ .Values.targetHost }}"
