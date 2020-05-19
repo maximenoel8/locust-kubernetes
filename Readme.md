@@ -52,67 +52,45 @@ ___
 
 ## Running
 
-### tl;dr
+### Deploy locus project
 
-Start minikube
-```sh
-minikube start
+```
+helm install directory-locust-kubernetes/loadtest-chart/ --namespace locust --name locust --set hostAliases.ip=${web_ip}
 ```
 
-Set docker environment to minikube
-```sh
-eval $(minikube docker-env)
+### Start swarm by command lines
+
+Locally :
+```
+curl -X POST -F 'locust_count=500' -F 'hatch_rate=5' http://<locust-url>:<locust-port>/swarm
 ```
 
-Initialize helm
-```sh
-helm init
+In kubernetes : 
+```
+kubectl run --generator=run-pod/v1 startlocust --image=djbingham/curl --restart='OnFailure' -i --tty --rm --command -- curl -X POST -F 'locust_count=500' -F 'hatch_rate=10' http://locust-master.locust.svc.cluster.local:8089/swarm
 ```
 
-Build docker image
-```sh
-docker build docker-image -t locust-tasks:latest
+
+### Stop load test by command lines
+
+Locally: 
+```
+curl http://<locust-url>:<locust-port>/stop
+```
+In kubernetes : 
+```
+kubectl run --generator=run-pod/v1 stoplocuts --generator=run-pod/v1 --image=djbingham/curl --restart='OnFailure' -i --tty --rm --command -- curl http://locust-master.locust.svc.cluster.local:8089/stop
 ```
 
-Install helm charts onto kubernetes cluster
-```sh
-helm install loadtest-chart --name locust
-```
 
-List services to find locust URL
-```sh
-minikube service list
-```
 
 ---
 
-
 ### Detailed installation
-#### Preparing the local kubernetes cluster
-Start a local kubernetes cluster with minikube by running the following command `minikube start`
-
-Confirm that everything is OK by running `minikube status` it should return something like:
-
-```
-minikube: Running
-cluster: Running
-kubectl: Correctly Configured: pointing to minikube-vm at 192.168.99.100
-```
-
-Now that we have minikube running we are going to want to point our docker environment to the one running on the cluster. Do this with the command `eval $(minikube docker-env)`. You can unset the environment at any time by running `eval $(docker-machine env --unset)`.
-
-Confirm that the docker environment is correct by running `docker images`. You should see a list of related kubernetes images like k8s.gcr.io.
-
-Now we're ready to install tiller onto our local kubernetes cluster. Tiller will make sure that we can use helm to install, update and delete our charts. The easiest way to do this is to simply run `helm init`.
 
 #### Building the docker image
 In the root of the repo, run `docker build docker-image -t locust-tasks:latest`
 
-#### Installing the helm charts
-Now that we have the docker image built and registered in the minikube docker registry. We can get our deployments and services for locust into our kubernetes cluster. Simply run `helm install loadtest-chart --name locust`.
-
-#### Confirm the installation and access locust dashboard
-To confirm that locust is running in our cluster. Run `minikube service list`. You should find locust-loadtest-chart-master with 3 URL's. Go to the first one and you should now see the locust load testing frontpage.
 
 ![locust][locust]
 
